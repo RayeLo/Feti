@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#7c5cc4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Feti">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;}
+  body{background:#e4e0d6;}
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:#c7c2b6;border-radius:6px;}
+  @keyframes feti-pop{0%{transform:scale(0.85);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+  @keyframes feti-rise{0%{transform:translateY(10px);opacity:0}100%{transform:translateY(0);opacity:1}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;justify-content:center;font-family:'Space Grotesk',sans-serif;color:#2b2926;">
+  <div style="width:100%;max-width:460px;min-height:100vh;background:#fcfaf4;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(43,41,38,0.12);position:relative;overflow:hidden;">
+
+    <!-- ============ INPUT SCREEN ============ -->
+    <sc-if value="{{ isInput }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;flex:1;padding:max(18px,env(safe-area-inset-top)) 18px 22px;gap:14px;">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <img src="{{ logoSrc }}" alt="Feti" style="height:34px;width:auto;display:block;">
+          <span style="font-family:'Caveat',cursive;font-weight:700;font-size:30px;line-height:1;">feti</span>
+        </div>
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:#8a8478;letter-spacing:0.5px;text-align:right;">what should<br>i eat?</span>
+      </div>
+
+      <div style="display:flex;align-items:flex-end;gap:10px;">
+        <img src="{{ homeSrc }}" alt="Feti" style="height:104px;width:auto;display:block;flex:0 0 auto;filter:drop-shadow(3px 4px 0 rgba(43,41,38,0.08));">
+        <div style="position:relative;flex:1;background:#fff;border:2.5px solid #2b2926;border-radius:16px 16px 16px 4px;padding:11px 13px;font-family:'Caveat',cursive;font-size:20px;font-weight:600;line-height:1.05;margin-bottom:8px;">Set your limits — I'll find the bite.</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:7px;background:#fff;border:2px solid #ece7dd;border-radius:16px;padding:11px 13px;">
+        <span style="font-size:13px;font-weight:600;">Where from?</span>
+        <div style="display:flex;gap:5px;background:#efeadf;border:2px solid #2b2926;border-radius:13px;padding:5px;">
+          <button onClick="{{ onSrcAny }}" style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:8px 6px;border:none;border-radius:9px;cursor:pointer;background:{{ srcAnyBg }};color:{{ srcAnyFg }};">Anywhere</button>
+          <button onClick="{{ onSrcHome }}" style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:8px 6px;border:none;border-radius:9px;cursor:pointer;background:{{ srcHomeBg }};color:{{ srcHomeFg }};">At home</button>
+          <button onClick="{{ onSrcOut }}" style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;padding:8px 6px;border:none;border-radius:9px;cursor:pointer;background:{{ srcOutBg }};color:{{ srcOutFg }};">Takeout</button>
+        </div>
+      </div>
+
+      <sc-for list="{{ metrics }}" as="m" hint-placeholder-count="5">
+        <div style="display:flex;flex-direction:column;gap:7px;background:#fff;border:2px solid #ece7dd;border-radius:16px;padding:11px 13px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <span style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;">{{ m.name }}<span style="font-family:'Space Mono',monospace;font-size:10px;font-weight:400;color:#7c5cc4;background:#f0ebfa;padding:1px 6px;border-radius:8px;">{{ m.pill }}</span></span>
+            <div style="display:flex;align-items:center;gap:9px;">
+              <span style="font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:#2b2926;">{{ m.valLabel }}</span>
+              <button onClick="{{ m.onToggleAny }}" style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;padding:4px 10px;border:2px solid {{ m.anyBorder }};border-radius:11px;cursor:pointer;background:{{ m.anyBg }};color:{{ m.anyFg }};">any</button>
+            </div>
+          </div>
+          <sc-if value="{{ m.active }}" hint-placeholder-val="{{ true }}">
+            <div onPointerDown="{{ m.onTrackDown }}" style="position:relative;height:26px;display:flex;align-items:center;cursor:pointer;touch-action:none;">
+              <span style="position:absolute;left:0;right:0;height:5px;background:#e4ddcf;border-radius:3px;"></span>
+              <span style="position:absolute;left:{{ m.minLeft }};right:{{ m.maxRight }};height:5px;background:#7c5cc4;border-radius:3px;"></span>
+              <span style="position:absolute;left:{{ m.minLeft }};width:20px;height:20px;margin-left:-10px;background:#fcfaf4;border:3px solid #2b2926;border-radius:50%;box-shadow:1px 1px 0 rgba(43,41,38,0.2);"></span>
+              <span style="position:absolute;left:{{ m.maxLeft }};width:20px;height:20px;margin-left:-10px;background:#fcfaf4;border:3px solid #2b2926;border-radius:50%;box-shadow:1px 1px 0 rgba(43,41,38,0.2);"></span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ m.anyOn }}" hint-placeholder-val="{{ false }}">
+            <div style="height:26px;display:flex;align-items:center;justify-content:center;border:2px dashed #d8d3c7;border-radius:9px;background:#f7f4ec;"><span style="font-family:'Space Mono',monospace;font-size:10px;color:#8a8478;">{{ m.anyHint }}</span></div>
+          </sc-if>
+        </div>
+      </sc-for>
+
+      <div style="display:flex;flex-direction:column;gap:7px;background:#f5f1fb;border:2px solid #e3d9f5;border-radius:16px;padding:11px 13px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-family:'Caveat',cursive;font-size:18px;font-weight:700;color:#7c5cc4;">energy split</span><span style="font-family:'Space Mono',monospace;font-size:9px;color:#8a8478;">{{ splitNote }}</span></div>
+        <div style="display:flex;height:15px;border:2px solid #2b2926;border-radius:7px;overflow:hidden;">
+          <span style="width:{{ splitP }};background:#7c5cc4;"></span>
+          <span style="width:{{ splitC }};background:#a98fe0;border-left:2px solid #2b2926;"></span>
+          <span style="width:{{ splitF }};background:#d7c9f3;border-left:2px solid #2b2926;"></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:#46433d;"><span>P {{ splitPt }}</span><span>C {{ splitCt }}</span><span>F {{ splitFt }}</span></div>
+      </div>
+
+      <button onClick="{{ onFind }}" style="margin-top:4px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;padding:15px;border:3px solid #2b2926;border-radius:18px;background:#e8a838;color:#2b2926;cursor:pointer;box-shadow:4px 4px 0 rgba(43,41,38,0.2);" style-active="transform:translate(2px,2px);box-shadow:2px 2px 0 rgba(43,41,38,0.2);">Find me a bite →</button>
+    </div>
+    </sc-if>
+
+    <!-- ============ RESULT SCREEN ============ -->
+    <sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;flex:1;padding:max(18px,env(safe-area-inset-top)) 18px 22px;gap:13px;">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <button onClick="{{ onEdit }}" style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;padding:7px 12px;border:2px solid #2b2926;border-radius:11px;background:#fcfaf4;color:#2b2926;cursor:pointer;display:flex;align-items:center;gap:5px;">← Edit limits</button>
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:#8a8478;">suggestion #{{ tryNum }}</span>
+      </div>
+
+      <div key="{{ poseKey }}" style="display:flex;flex-direction:column;align-items:center;gap:10px;animation:feti-rise 0.28s ease both;">
+        <div style="position:relative;max-width:300px;background:#fff;border:2.5px solid #2b2926;border-radius:16px;padding:10px 15px;font-family:'Caveat',cursive;font-size:21px;font-weight:600;text-align:center;line-height:1.08;">{{ speech }}<span style="position:absolute;bottom:-9px;left:50%;margin-left:-7px;width:12px;height:12px;background:#fff;border-right:2.5px solid #2b2926;border-bottom:2.5px solid #2b2926;transform:rotate(45deg);"></span></div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;">
+          <img src="{{ poseSrc }}" alt="Feti" style="height:150px;width:auto;display:block;filter:drop-shadow(3px 5px 0 rgba(43,41,38,0.09));animation:feti-pop 0.3s ease both;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><span style="font-family:'Space Mono',monospace;font-size:9px;color:#8a8478;">patience</span><div style="display:flex;flex-direction:column;gap:4px;"><sc-for list="{{ pips }}" as="p" hint-placeholder-count="5"><span style="width:15px;height:15px;border:2px solid #2b2926;border-radius:4px;background:{{ p.bg }};"></span></sc-for></div></div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+        <span style="font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;padding:3px 9px;border-radius:9px;color:{{ typeColor }};background:{{ typeBg }};">{{ typeLabel }}</span>
+        <div style="text-align:center;font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;line-height:1.12;">{{ foodName }}<br><span style="font-size:12px;font-weight:400;color:#8a8478;">{{ foodDesc }}</span></div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:13px;border:2.5px solid #2b2926;border-radius:16px;padding:11px 14px;background:{{ matchBg }};">
+        <div style="display:flex;flex-direction:column;line-height:0.95;"><span style="font-family:'Caveat',cursive;font-size:38px;font-weight:700;color:{{ accent }};">{{ matchPct }}</span><span style="font-family:'Space Mono',monospace;font-size:9px;color:#8a8478;">MATCH</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div style="height:12px;background:#fff;border:2px solid #2b2926;border-radius:6px;position:relative;overflow:hidden;"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ matchWidth }};background:{{ accent }};"></span></div><span style="font-size:11.5px;line-height:1.2;color:#46433d;">{{ reason }}</span></div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:7px;border:2px solid #ece7dd;border-radius:16px;padding:12px 14px;background:#fff;">
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px;">
+            <span style="font-weight:600;">{{ r.label }}</span>
+            <span style="display:flex;gap:7px;align-items:baseline;">
+              <span style="font-family:'Space Mono',monospace;font-weight:700;color:{{ r.valColor }};">{{ r.valTxt }}</span>
+              <sc-if value="{{ r.showPct }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Space Mono',monospace;font-size:10px;color:{{ r.pctColor }};background:{{ r.pctBg }};padding:1px 5px;border-radius:7px;">{{ r.pctTxt }}</span></sc-if>
+              <span style="font-family:'Space Mono',monospace;font-size:10px;color:#8a8478;">{{ r.rangeTxt }}</span>
+              <span style="font-weight:700;font-size:11px;color:{{ r.markColor }};min-width:30px;text-align:right;">{{ r.mark }}</span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ canRetry }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:10px;margin-top:2px;">
+          <button onClick="{{ onAnother }}" style="flex:1;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;padding:14px;border:2.5px solid #2b2926;border-radius:15px;background:#fcfaf4;color:#2b2926;cursor:pointer;" style-active="transform:translate(1px,1px);">Try another</button>
+          <button onClick="{{ onEat }}" style="flex:1;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;padding:14px;border:2.5px solid #2b2926;border-radius:15px;background:#e8a838;color:#2b2926;cursor:pointer;box-shadow:3px 3px 0 rgba(43,41,38,0.2);" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(43,41,38,0.2);">{{ eatLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noRetry }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;margin-top:2px;">
+          <div style="background:#fbe9e7;border:2px solid #d6564f;border-radius:13px;padding:9px 13px;"><span style="font-family:'Caveat',cursive;font-size:18px;font-weight:600;color:#46433d;line-height:1.08;">Feti's had enough! Edit your limits for a fresh start.</span></div>
+          <button onClick="{{ onEat }}" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;padding:15px;border:2.5px solid #2b2926;border-radius:15px;background:#e8a838;color:#2b2926;cursor:pointer;box-shadow:3px 3px 0 rgba(43,41,38,0.2);" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(43,41,38,0.2);">{{ eatLabel }}</button>
+        </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- ============ DONE SCREEN ============ -->
+    <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;flex:1;align-items:center;justify-content:center;text-align:center;padding:30px 24px;gap:16px;">
+      <img src="{{ donePose }}" alt="Feti" style="height:200px;width:auto;display:block;filter:drop-shadow(4px 6px 0 rgba(43,41,38,0.1));animation:feti-pop 0.35s ease both;">
+      <div style="font-family:'Caveat',cursive;font-size:38px;font-weight:700;line-height:0.95;color:#7c5cc4;">Enjoy your meal!</div>
+      <span style="font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;padding:3px 9px;border-radius:9px;color:{{ typeColor }};background:{{ typeBg }};">{{ typeLabel }}</span>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;line-height:1.2;">{{ foodName }}<br><span style="font-size:12px;font-weight:400;color:#8a8478;">{{ doneStats }}</span></div>
+      <button onClick="{{ onRestart }}" style="margin-top:6px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;padding:14px 28px;border:3px solid #2b2926;border-radius:16px;background:#e8a838;color:#2b2926;cursor:pointer;box-shadow:4px 4px 0 rgba(43,41,38,0.2);" style-active="transform:translate(2px,2px);box-shadow:2px 2px 0 rgba(43,41,38,0.2);">Start over</button>
+    </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.pools = {
+      home: ['assets/feti/home-1.png','assets/feti/home-2.png','assets/feti/home-3.png'],
+      delighted: ['assets/feti/delighted-1.png','assets/feti/delighted-2.png','assets/feti/delighted-3.png'],
+      pleased: ['assets/feti/pleased-1.png','assets/feti/pleased-2.png','assets/feti/pleased-3.png'],
+      annoyed: ['assets/feti/annoyed-1.png','assets/feti/annoyed-2.png'],
+      irritated: ['assets/feti/irritated-1.png','assets/feti/irritated-2.png'],
+      furious: ['assets/feti/furious-1.png'],
+    };
+    this.speeches = {
+      delighted: ["Ooh — the perfect bite!","Yes! This one's spot on.","Trust me, you'll love this one."],
+      pleased: ["Sure thing — here's another.","No problem! Try this one.","Happy to help. How about this?"],
+      annoyed: ["…Again? Okay, try this.","Hm. Fine, here's another.","Really? Alright — this then."],
+      irritated: ["Seriously? That's three now.","Ugh. THIS one. Eat it.","You're pushing it. Try this."],
+      furious: ["ARE YOU KIDDING ME. EAT. THIS.","ENOUGH! THIS IS THE ONE.","I'M DONE. EAT. IT. NOW."],
+    };
+    this.moods = ['delighted','pleased','annoyed','irritated','furious'];
+    this.accents = { delighted:'#6fae5f', pleased:'#9bbf4f', annoyed:'#e8b53e', irritated:'#e08a3e', furious:'#d6564f' };
+    this.matchBgs = { delighted:'#f1f6ee', pleased:'#f3f6ec', annoyed:'#fbf6e6', irritated:'#fbf1e6', furious:'#fbe9e7' };
+    // food db: kcal, p(rotein), c(arbs), f(at), fiber  (grams)
+    // food db: kcal, p/c/f/fib grams · type: snack | recipe | restaurant
+    // restaurant macros are realistic approximations, not official brand figures
+    this.FOODS = [
+      // ---- RECIPES (home-cooked meal ideas) ----
+      {name:'Greek yogurt & berry bowl', desc:'with granola & honey', type:'recipe', kcal:540,p:38,c:60,f:15,fib:8},
+      {name:'Chicken & quinoa salad', desc:'lemon-herb dressing', type:'recipe', kcal:520,p:40,c:45,f:18,fib:9},
+      {name:'Turkey & hummus wrap', desc:'whole-wheat tortilla', type:'recipe', kcal:480,p:34,c:50,f:14,fib:7},
+      {name:'Tuna rice bowl', desc:'edamame & sesame', type:'recipe', kcal:505,p:38,c:52,f:9,fib:9},
+      {name:'Chicken & rice meal prep', desc:'roasted veg', type:'recipe', kcal:560,p:42,c:58,f:14,fib:5},
+      {name:'Greek chicken pita', desc:'tzatziki & cucumber', type:'recipe', kcal:500,p:36,c:48,f:16,fib:7},
+      {name:'Protein oatmeal', desc:'banana & peanut butter', type:'recipe', kcal:510,p:33,c:68,f:11,fib:10},
+      {name:'Shrimp tacos', desc:'slaw & lime crema', type:'recipe', kcal:490,p:30,c:52,f:13,fib:8},
+      {name:'Salmon & sweet potato', desc:'steamed greens', type:'recipe', kcal:580,p:36,c:44,f:22,fib:7},
+      {name:'Tofu stir-fry & rice', desc:'ginger-soy glaze', type:'recipe', kcal:540,p:26,c:70,f:14,fib:8},
+      {name:'Sheet-pan chicken fajitas', desc:'peppers & onions', type:'recipe', kcal:530,p:40,c:46,f:18,fib:9},
+      {name:'Turkey chili', desc:'kidney beans & corn', type:'recipe', kcal:470,p:38,c:48,f:12,fib:13},
+      {name:'Egg & avocado toast', desc:'two slices, poached', type:'recipe', kcal:470,p:21,c:38,f:26,fib:9},
+      {name:'Lentil soup & bread', desc:'crusty sourdough', type:'recipe', kcal:460,p:24,c:62,f:10,fib:14},
+      {name:'Beef & bean burrito', desc:'brown rice & salsa', type:'recipe', kcal:620,p:32,c:60,f:24,fib:12},
+      {name:'Caprese ciabatta', desc:'mozzarella & basil', type:'recipe', kcal:500,p:22,c:46,f:26,fib:4},
+      {name:'Chicken Caesar (light)', desc:'romaine & parmesan', type:'recipe', kcal:450,p:38,c:22,f:20,fib:5},
+      {name:'Veggie omelette & toast', desc:'spinach & feta', type:'recipe', kcal:440,p:26,c:28,f:22,fib:6},
+      {name:'Baked salmon & quinoa', desc:'dill & lemon', type:'recipe', kcal:560,p:40,c:42,f:22,fib:7},
+      {name:'Cottage cheese & fruit', desc:'peach & almonds', type:'recipe', kcal:360,p:28,c:34,f:6,fib:5},
+      {name:'Protein smoothie', desc:'berry & whey', type:'recipe', kcal:420,p:35,c:48,f:8,fib:6},
+      {name:'Baked falafel bowl', desc:'tahini & couscous', type:'recipe', kcal:540,p:18,c:64,f:22,fib:13},
+      {name:'Steak & potato (small)', desc:'sirloin, herb butter', type:'recipe', kcal:590,p:40,c:40,f:26,fib:6},
+      {name:'Tomato pasta (small)', desc:'basil & parmesan', type:'recipe', kcal:510,p:16,c:82,f:12,fib:8},
+      {name:'Black bean quesadilla', desc:'cheddar & pico', type:'recipe', kcal:560,p:24,c:58,f:24,fib:12},
+      {name:'Overnight oats & nuts', desc:'chia & maple', type:'recipe', kcal:520,p:18,c:58,f:22,fib:9},
+      {name:'Tuna melt', desc:'sourdough & cheddar', type:'recipe', kcal:540,p:34,c:40,f:24,fib:4},
+      {name:'Veg curry & rice', desc:'chickpea & coconut', type:'recipe', kcal:560,p:14,c:80,f:18,fib:10},
+      {name:'Cobb salad (light)', desc:'egg, chicken, avocado', type:'recipe', kcal:470,p:34,c:18,f:28,fib:6},
+      {name:'Shakshuka & pita', desc:'eggs in tomato sauce', type:'recipe', kcal:480,p:24,c:44,f:24,fib:8},
+      // ---- SNACKS ----
+      {name:'Apple & peanut butter', desc:'sliced, 1 tbsp PB', type:'snack', kcal:270,p:7,c:34,f:14,fib:6},
+      {name:'Greek yogurt cup', desc:'plain, nonfat', type:'snack', kcal:150,p:15,c:12,f:4,fib:0},
+      {name:'Protein bar', desc:'chocolate chip', type:'snack', kcal:220,p:20,c:24,f:7,fib:6},
+      {name:'Mixed nuts', desc:'small handful', type:'snack', kcal:200,p:6,c:7,f:18,fib:3},
+      {name:'String cheese ×2', desc:'part-skim mozzarella', type:'snack', kcal:160,p:14,c:2,f:12,fib:0},
+      {name:'Hummus & carrots', desc:'¼ cup + sticks', type:'snack', kcal:180,p:6,c:20,f:9,fib:6},
+      {name:'Hard-boiled eggs ×2', desc:'pinch of salt', type:'snack', kcal:140,p:12,c:1,f:10,fib:0},
+      {name:'Beef jerky', desc:'1 oz, peppered', type:'snack', kcal:160,p:26,c:8,f:3,fib:0},
+      {name:'Banana & almond butter', desc:'1 tbsp', type:'snack', kcal:250,p:7,c:34,f:12,fib:5},
+      {name:'Cottage cheese & berries', desc:'low-fat', type:'snack', kcal:180,p:18,c:16,f:3,fib:3},
+      {name:'Edamame', desc:'1 cup, sea salt', type:'snack', kcal:190,p:17,c:15,f:8,fib:8},
+      {name:'Rice cakes & PB', desc:'two cakes', type:'snack', kcal:230,p:8,c:28,f:10,fib:3},
+      {name:'Trail mix', desc:'nuts & dried fruit', type:'snack', kcal:280,p:8,c:28,f:16,fib:4},
+      {name:'Dark chocolate & almonds', desc:'1 oz each', type:'snack', kcal:240,p:5,c:18,f:18,fib:5},
+      {name:'Tuna pouch & crackers', desc:'lemon-pepper', type:'snack', kcal:220,p:22,c:18,f:6,fib:2},
+      {name:'Popcorn', desc:'3 cups, air-popped', type:'snack', kcal:150,p:3,c:30,f:3,fib:5},
+      {name:'Turkey & cheese roll-ups', desc:'no bread', type:'snack', kcal:200,p:22,c:3,f:11,fib:0},
+      {name:'Veggies & guacamole', desc:'½ cup guac', type:'snack', kcal:190,p:4,c:16,f:14,fib:7},
+      // ---- RESTAURANT / TAKEOUT (approx) ----
+      {name:'Crispy chicken sandwich', desc:'fast-food style', type:'restaurant', kcal:520,p:28,c:46,f:24,fib:3},
+      {name:'Cheeseburger & small fries', desc:'classic combo', type:'restaurant', kcal:680,p:30,c:62,f:34,fib:5},
+      {name:'Chicken burrito bowl', desc:'rice, beans, salsa', type:'restaurant', kcal:630,p:42,c:62,f:22,fib:12},
+      {name:'Salmon poke bowl', desc:'rice & edamame', type:'restaurant', kcal:560,p:34,c:66,f:16,fib:7},
+      {name:'Pepperoni pizza', desc:'2 slices', type:'restaurant', kcal:600,p:26,c:64,f:26,fib:4},
+      {name:'Pad thai', desc:'takeout portion', type:'restaurant', kcal:700,p:28,c:90,f:24,fib:5},
+      {name:'Chicken tikka & naan', desc:'half order', type:'restaurant', kcal:720,p:40,c:70,f:30,fib:8},
+      {name:'Sushi combo', desc:'8 pieces + roll', type:'restaurant', kcal:540,p:26,c:80,f:10,fib:6},
+      {name:'Caesar salad w/ chicken', desc:'dressing on side', type:'restaurant', kcal:480,p:38,c:18,f:28,fib:5},
+      {name:'Falafel wrap', desc:'tahini & salad', type:'restaurant', kcal:560,p:18,c:68,f:24,fib:11},
+      {name:'Beef pho', desc:'large bowl', type:'restaurant', kcal:480,p:30,c:58,f:10,fib:4},
+      {name:'Bibimbap', desc:'mixed rice bowl', type:'restaurant', kcal:620,p:28,c:82,f:18,fib:7},
+      {name:'Chicken shawarma plate', desc:'rice & garlic sauce', type:'restaurant', kcal:700,p:44,c:60,f:30,fib:9},
+      {name:'Veggie buddha bowl', desc:'grains & tahini', type:'restaurant', kcal:540,p:18,c:72,f:20,fib:13},
+      {name:'Fish & chips (small)', desc:'beer-battered cod', type:'restaurant', kcal:740,p:34,c:68,f:38,fib:6},
+      {name:'Chicken quesadilla', desc:'side of salsa', type:'restaurant', kcal:660,p:34,c:54,f:34,fib:6},
+      {name:'Turkey club sandwich', desc:'with side salad', type:'restaurant', kcal:580,p:36,c:48,f:26,fib:5},
+      {name:'Açaí bowl', desc:'granola & banana', type:'restaurant', kcal:480,p:8,c:88,f:12,fib:10},
+    ];
+    this.typeMeta = {
+      snack: { label:'Snack', color:'#c98a2e', bg:'#fbf1df' },
+      recipe: { label:'Recipe', color:'#7c5cc4', bg:'#f0ebfa' },
+      restaurant: { label:'Restaurant', color:'#3f86b5', bg:'#e6f0f6' },
+    };
+
+    const saved = this.load();
+    this.state = {
+      screen: 'input',
+      b: saved || this.defaults(),
+      source: this.loadSource(),
+      homePose: this.pick(this.pools.home),
+      logoPose: this.pick(this.pools.home),
+      idx: 0, tries: 0, pose: this.pools.delighted[0], speech: this.speeches.delighted[0],
+      donePose: this.pools.pleased[0], poseKey: 0,
+    };
+    this.ranked = [];
+    this._onMove = this._onMove.bind(this);
+    this._onUp = this._onUp.bind(this);
+  }
+
+  defaults() {
+    return {
+      calories: { min:450, max:600, any:false },
+      protein:  { gmin:30, gmax:45, pmin:25, pmax:35, any:false },
+      carbs:    { gmin:40, gmax:70, pmin:40, pmax:50, any:false },
+      fat:      { gmin:10, gmax:22, pmin:20, pmax:30, any:false },
+      fiber:    { min:5, max:12, any:false },
+    };
+  }
+
+  pick(a) { return a[Math.floor(Math.random()*a.length)]; }
+  load() { try { const r = localStorage.getItem('feti.boundaries.v1'); return r ? JSON.parse(r) : null; } catch(e){ return null; } }
+  save() { try { localStorage.setItem('feti.boundaries.v1', JSON.stringify(this.state.b)); } catch(e){} }
+  loadSource() { try { return localStorage.getItem('feti.source.v1') || 'any'; } catch(e){ return 'any'; } }
+  setSource(src) { this.setState({ source: src }, () => { try { localStorage.setItem('feti.source.v1', src); } catch(e){} }); }
+
+  componentDidMount() {
+    window.addEventListener('pointermove', this._onMove);
+    window.addEventListener('pointerup', this._onUp);
+    if ('serviceWorker' in navigator) {
+      try { navigator.serviceWorker.register('sw.js').catch(()=>{}); } catch(e){}
+    }
+  }
+  componentWillUnmount() {
+    window.removeEventListener('pointermove', this._onMove);
+    window.removeEventListener('pointerup', this._onUp);
+  }
+
+  // ---- slider domains ----
+  domainOf(key) {
+    const capAny = this.state.b.calories.any;
+    if (key === 'calories') return { dmin:0, dmax:1000, step:10, unit:'' };
+    if (key === 'fiber')    return { dmin:0, dmax:40, step:1, unit:'g' };
+    if (capAny) return { dmin:0, dmax:100, step:1, unit:'%' };
+    if (key === 'protein')  return { dmin:0, dmax:80, step:1, unit:'g' };
+    if (key === 'carbs')    return { dmin:0, dmax:150, step:1, unit:'g' };
+    if (key === 'fat')      return { dmin:0, dmax:60, step:1, unit:'g' };
+  }
+  rangeOf(key) {
+    const b = this.state.b, capAny = b.calories.any, d = this.domainOf(key);
+    let min, max;
+    if (key === 'calories' || key === 'fiber') { min = b[key].min; max = b[key].max; }
+    else if (capAny) { min = b[key].pmin; max = b[key].pmax; }
+    else { min = b[key].gmin; max = b[key].gmax; }
+    return { min, max, ...d };
+  }
+  setRange(key, handle, v) {
+    const b = JSON.parse(JSON.stringify(this.state.b));
+    const capAny = b.calories.any, d = this.domainOf(key);
+    v = Math.round(v / d.step) * d.step;
+    v = Math.max(d.dmin, Math.min(d.dmax, v));
+    let lo, hi;
+    if (key === 'calories' || key === 'fiber') { lo='min'; hi='max'; }
+    else if (capAny) { lo='pmin'; hi='pmax'; }
+    else { lo='gmin'; hi='gmax'; }
+    if (handle === 'min') b[key][lo] = Math.min(v, b[key][hi] - d.step);
+    else b[key][hi] = Math.max(v, b[key][lo] + d.step);
+    this.setState({ b });
+  }
+  toggleAny(key) {
+    const b = JSON.parse(JSON.stringify(this.state.b));
+    b[key].any = !b[key].any;
+    this.setState({ b }, () => this.save());
+  }
+
+  // ---- pointer drag ----
+  _valFromX(x, rect, r) {
+    let ratio = (x - rect.left) / rect.width;
+    ratio = Math.max(0, Math.min(1, ratio));
+    return r.dmin + ratio * (r.dmax - r.dmin);
+  }
+  makeTrackDown(key) {
+    return (e) => {
+      const r = this.rangeOf(key);
+      const rect = e.currentTarget.getBoundingClientRect();
+      const v = this._valFromX(e.clientX, rect, r);
+      const mid = (r.min + r.max) / 2;
+      const handle = v < mid ? 'min' : 'max';
+      this.dragState = { key, rect, handle };
+      this.setRange(key, handle, v);
+      e.preventDefault();
+    };
+  }
+  _onMove(e) {
+    if (!this.dragState) return;
+    const { key, rect, handle } = this.dragState;
+    const r = this.rangeOf(key);
+    this.setRange(key, handle, this._valFromX(e.clientX, rect, r));
+  }
+  _onUp() { if (this.dragState) { this.dragState = null; this.save(); } }
+
+  // ---- scoring ----
+  pctOfCal(food, key) {
+    const k = key === 'fat' ? 9 : 4;
+    return Math.round((food[key] * k / food.kcal) * 100);
+  }
+  scoreFood(food) {
+    const b = this.state.b, capAny = b.calories.any;
+    const subs = [];
+    const add = (val, min, max, tol) => {
+      if (val >= min && val <= max) { subs.push(1); return; }
+      const out = val < min ? min - val : val - max;
+      subs.push(Math.max(0, 1 - out / tol));
+    };
+    if (!capAny) add(food.kcal, b.calories.min, b.calories.max, 200);
+    const macro = (key, tolG, tolP) => {
+      if (b[key].any) return;
+      if (capAny) add(this.pctOfCal(food, key === 'carbs' ? 'c' : key === 'protein' ? 'p' : 'f'), b[key].pmin, b[key].pmax, tolP);
+      else add(food[key === 'carbs' ? 'c' : key === 'protein' ? 'p' : 'f'], b[key].gmin, b[key].gmax, tolG);
+    };
+    macro('protein', 25, 20); macro('carbs', 50, 20); macro('fat', 20, 15);
+    if (!b.fiber.any) add(food.fib, b.fiber.min, b.fiber.max, 8);
+    const score = subs.length ? subs.reduce((a,c)=>a+c,0)/subs.length : 1;
+    return Math.round(score * 100);
+  }
+  rank() {
+    const src = this.state.source;
+    const pool = this.FOODS.filter(f => src === 'any' ? true : src === 'out' ? f.type === 'restaurant' : f.type !== 'restaurant');
+    const arr = pool.map(f => ({ food:f, match:this.scoreFood(f), r:Math.random() }));
+    arr.sort((a,c) => c.match - a.match || a.r - c.r);
+    this.ranked = arr;
+  }
+
+  // ---- transitions ----
+  showAt(idx, tries) {
+    const mood = this.moods[Math.min(tries, 4)];
+    this.setState({
+      screen:'result', idx, tries,
+      pose: this.pick(this.pools[mood]),
+      speech: this.pick(this.speeches[mood]),
+      poseKey: this.state.poseKey + 1,
+    });
+  }
+  onFind() { this.rank(); this.showAt(0, 0); this.save(); }
+  onAnother() {
+    if (this.state.tries >= 4) return;
+    const idx = Math.min(this.state.idx + 1, this.ranked.length - 1);
+    this.showAt(idx, this.state.tries + 1);
+  }
+  onEdit() { this.setState({ screen:'input' }); }
+  onEat() { this.setState({ screen:'done', donePose: this.pick(this.pools.delighted.concat(this.pools.pleased)) }); }
+  onRestart() { this.setState({ screen:'input', homePose: this.pick(this.pools.home) }); }
+
+  // ---- view builders ----
+  metricRows() {
+    const b = this.state.b, capAny = b.calories.any;
+    const defs = [
+      { key:'calories', name:'Calories' },
+      { key:'protein', name:'Protein' },
+      { key:'carbs', name:'Carbs' },
+      { key:'fat', name:'Fat' },
+      { key:'fiber', name:'Fiber' },
+    ];
+    const calMid = (b.calories.min + b.calories.max) / 2;
+    return defs.map(({key,name}) => {
+      const anyOn = b[key].any;
+      const r = this.rangeOf(key);
+      const span = r.dmax - r.dmin;
+      const minPct = ((r.min - r.dmin) / span) * 100;
+      const maxPct = ((r.max - r.dmin) / span) * 100;
+      let valLabel;
+      if (key === 'calories') valLabel = `${r.min}–${r.max}`;
+      else valLabel = `${r.min}–${r.max}${r.unit}`;
+      let pill = '';
+      if ((key==='protein'||key==='carbs'||key==='fat') && !capAny && !anyOn) {
+        const k = key==='fat'?9:4; const mid=(r.min+r.max)/2;
+        pill = `≈${Math.round(mid*k/calMid*100)}%`;
+      }
+      let anyHint = 'no preference — Feti decides';
+      if (key==='calories') anyHint = 'no calorie cap · macros set by %';
+      return {
+        key, name, pill, valLabel, anyOn, active: !anyOn,
+        minLeft: minPct+'%', maxLeft: maxPct+'%', maxRight: (100-maxPct)+'%',
+        anyHint,
+        anyBg: anyOn ? '#2b2926' : '#fff',
+        anyFg: anyOn ? '#fcfaf4' : '#8a8478',
+        anyBorder: anyOn ? '#2b2926' : '#d8d3c7',
+        onToggleAny: () => this.toggleAny(key),
+        onTrackDown: this.makeTrackDown(key),
+      };
+    });
+  }
+  buildSplit() {
+    const b = this.state.b, capAny = b.calories.any;
+    const mid = (o,lo,hi) => (o[lo]+o[hi])/2;
+    let p,c,f;
+    if (capAny) { p=mid(b.protein,'pmin','pmax'); c=mid(b.carbs,'pmin','pmax'); f=mid(b.fat,'pmin','pmax'); }
+    else {
+      const pk=mid(b.protein,'gmin','gmax')*4, ck=mid(b.carbs,'gmin','gmax')*4, fk=mid(b.fat,'gmin','gmax')*9;
+      const t=pk+ck+fk||1; p=pk/t*100; c=ck/t*100; f=fk/t*100;
+    }
+    const t=p+c+f||1; const P=Math.round(p/t*100), C=Math.round(c/t*100); const F=100-P-C;
+    return { P, C, F };
+  }
+  buildResult() {
+    const item = this.ranked[this.state.idx] || { food:this.FOODS[0], match:100 };
+    const food = item.food, b = this.state.b, capAny = b.calories.any;
+    const mood = this.moods[Math.min(this.state.tries,4)];
+    const accent = this.accents[mood];
+    const rowsDef = [
+      { key:'calories', label:'Calories', val:food.kcal, unit:'', macro:null },
+      { key:'protein', label:'Protein', val:food.p, unit:'g', macro:'p' },
+      { key:'carbs', label:'Carbs', val:food.c, unit:'g', macro:'c' },
+      { key:'fat', label:'Fat', val:food.f, unit:'g', macro:'f' },
+      { key:'fiber', label:'Fiber', val:food.fib, unit:'g', macro:null },
+    ];
+    let worst = null;
+    const rows = rowsDef.map(d => {
+      const anyOn = b[d.key].any;
+      const isMacro = !!d.macro;
+      const usePct = isMacro && capAny;
+      let min, max, unit, value;
+      if (d.key==='calories') { min=b.calories.min; max=b.calories.max; unit=''; value=food.kcal; }
+      else if (d.key==='fiber') { min=b.fiber.min; max=b.fiber.max; unit='g'; value=food.fib; }
+      else if (usePct) { min=b[d.key].pmin; max=b[d.key].pmax; unit='%'; value=this.pctOfCal(food,d.macro); }
+      else { min=b[d.key].gmin; max=b[d.key].gmax; unit='g'; value=food[d.macro]; }
+      const active = !anyOn && !(d.key==='calories' && capAny);
+      const ok = !active || (value>=min && value<=max);
+      let mark='✓', markColor='#6fae5f', deltaTxt='';
+      if (!active) { mark='–'; markColor='#c7c2b6'; }
+      else if (!ok) {
+        const high = value>max; const past = high ? value-max : min-value;
+        deltaTxt = (high?'+':'−')+past+(usePct?'%':(d.key==='calories'?'':'g'));
+        mark='⚠ '+deltaTxt; markColor='#d6564f';
+        const tol = d.key==='calories'?200:(usePct?18:(d.key==='fat'?20:40));
+        const sev = past/tol; if (!worst || sev>worst.sev) worst={ label:d.label.toLowerCase(), dir: high?'high':'low', sev };
+      }
+      const pctTxt = isMacro ? this.pctOfCal(food,d.macro)+'%' : '';
+      const macroBad = isMacro && active && !ok;
+      return {
+        label:d.label,
+        valTxt: value + (d.key==='calories'?'':unit==='%'? '' : unit) + (usePct? '%':''),
+        valColor: (!ok && active) ? '#d6564f' : '#2b2926',
+        showPct: isMacro && !capAny,
+        pctTxt, pctColor: macroBad ? '#d6564f' : '#7c5cc4', pctBg: macroBad ? '#fae3e1':'#f0ebfa',
+        rangeTxt: active ? `/ ${min}–${max}${unit==='%'?'%':''}` : '/ any',
+        mark, markColor,
+      };
+    });
+    // fix protein/carb/fat valTxt for gram mode (value already grams). recompute cleanly:
+    rows[1].valTxt = food.p+'g'; rows[2].valTxt = food.c+'g'; rows[3].valTxt = food.f+'g';
+    if (capAny) { rows[1].valTxt = this.pctOfCal(food,'p')+'%'; rows[2].valTxt = this.pctOfCal(food,'c')+'%'; rows[3].valTxt = this.pctOfCal(food,'f')+'%'; }
+    rows[0].valTxt = ''+food.kcal; rows[4].valTxt = food.fib+'g';
+    const reason = worst ? `Close — but it's a bit ${worst.dir} on ${worst.label}.` : (item.match>=98 ? 'Lands in every range — top pick.' : 'Comfortably inside your ranges.');
+    const tm = this.typeMeta[food.type] || this.typeMeta.recipe;
+    return { food, match:item.match, accent, matchBg:this.matchBgs[mood], rows, reason, typeLabel:tm.label, typeColor:tm.color, typeBg:tm.bg };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const base = {
+      isInput: s.screen==='input', isResult: s.screen==='result', isDone: s.screen==='done',
+      logoSrc: s.logoPose, homeSrc: s.homePose,
+    };
+    if (s.screen === 'input') {
+      const sp = this.buildSplit();
+      const capAny = s.b.calories.any;
+      const segBg = (k) => s.source === k ? '#2b2926' : 'transparent';
+      const segFg = (k) => s.source === k ? '#fcfaf4' : '#6b665d';
+      return { ...base,
+        metrics: this.metricRows(),
+        srcAnyBg: segBg('any'), srcAnyFg: segFg('any'),
+        srcHomeBg: segBg('home'), srcHomeFg: segFg('home'),
+        srcOutBg: segBg('out'), srcOutFg: segFg('out'),
+        onSrcAny: () => this.setSource('any'),
+        onSrcHome: () => this.setSource('home'),
+        onSrcOut: () => this.setSource('out'),
+        splitNote: capAny ? 'auto-balanced · 100%' : 'from your ranges',
+        splitP: sp.P+'%', splitC: sp.C+'%', splitF: sp.F+'%',
+        splitPt: sp.P+'%', splitCt: sp.C+'%', splitFt: sp.F+'%',
+        onFind: () => this.onFind(),
+      };
+    }
+    if (s.screen === 'result') {
+      const r = this.buildResult();
+      const filled = Math.max(0, 5 - s.tries);
+      const pips = [0,1,2,3,4].map(i => ({ bg: i < filled ? r.accent : 'transparent' }));
+      return { ...base,
+        tryNum: s.tries+1, speech: s.speech, poseSrc: s.pose, poseKey: 'p'+s.poseKey,
+        pips, foodName: r.food.name, foodDesc: r.food.desc,
+        matchPct: r.match+'%', matchWidth: r.match+'%', accent: r.accent, matchBg: r.matchBg,
+        reason: r.reason, rows: r.rows,
+        typeLabel: r.typeLabel, typeColor: r.typeColor, typeBg: r.typeBg,
+        eatLabel: s.tries>=3 ? 'Fine, eat it' : 'Eat this!',
+        canRetry: s.tries < 4, noRetry: s.tries >= 4,
+        onAnother: () => this.onAnother(), onEat: () => this.onEat(), onEdit: () => this.onEdit(),
+      };
+    }
+    // done
+    const item = this.ranked[s.idx] || { food:this.FOODS[0] };
+    const f = item.food;
+    const tm = this.typeMeta[f.type] || this.typeMeta.recipe;
+    return { ...base,
+      donePose: s.donePose, foodName: f.name,
+      typeLabel: tm.label, typeColor: tm.color, typeBg: tm.bg,
+      doneStats: `${f.kcal} cal · ${f.p}P · ${f.c}C · ${f.f}F · ${f.fib}g fiber`,
+      onRestart: () => this.onRestart(),
+    };
+  }
+}
+</script>
+</body>
+</html>
