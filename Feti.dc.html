@@ -313,7 +313,7 @@ class Component extends DCLogic {
   // ---- slider domains ----
   domainOf(key) {
     const capAny = this.state.b.calories.any;
-    if (key === 'calories') return { dmin:0, dmax:2000, step:10, unit:'' };
+    if (key === 'calories') return { dmin:0, dmax:1000, step:10, unit:'' };
     if (key === 'fiber')    return { dmin:0, dmax:40, step:1, unit:'g' };
     if (capAny) return { dmin:0, dmax:100, step:1, unit:'%' };
     if (key === 'protein')  return { dmin:0, dmax:80, step:1, unit:'g' };
